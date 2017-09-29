@@ -70,16 +70,16 @@
               
               <article class="markdown-body entry-content" itemprop="text" id="grip-content">
                 <h2>
-<a id="user-content-practical-introduction-to-scala" class="anchor" href="#practical-introduction-to-scala" aria-hidden="true"><span class="octicon octicon-link"></span></a>Practical Introduction to Scala</h2>
+<a id="user-content-practical-introduction-to-scala" class="anchor" href="#practical-introduction-to-scala" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Practical Introduction to Scala</h2>
 <h3>
-<a id="user-content-scala" class="anchor" href="#scala" aria-hidden="true"><span class="octicon octicon-link"></span></a>Scala</h3>
+<a id="user-content-scala" class="anchor" href="#scala" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Scala</h3>
 <ul>
 <li>General-Purpose</li>
 <li>Provides support for Functional Programming</li>
 <li>Strong static type system.</li>
 </ul>
 <h3>
-<a id="user-content-first-impressions" class="anchor" href="#first-impressions" aria-hidden="true"><span class="octicon octicon-link"></span></a>First Impressions</h3>
+<a id="user-content-first-impressions" class="anchor" href="#first-impressions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>First Impressions</h3>
 <ul>
 <li>
 <p>Gentle introduction to functional programming</p>
@@ -100,22 +100,226 @@ familiar concepts such as classes and loops if need.</p>
 </li>
 </ul>
 <h3>
-<a id="user-content-sbt" class="anchor" href="#sbt" aria-hidden="true"><span class="octicon octicon-link"></span></a>SBT</h3>
+<a id="user-content-sbt" class="anchor" href="#sbt" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>SBT</h3>
 <ul>
-<li>
-<p>Interactive build tool for scala.</p>
-</li>
-<li>
-<p>Very easy to use, documentation wasn't particularly clear I found.</p>
-</li>
-<li>
-<p>Install sbt for <a href="http://www.scala-sbt.org/0.13/docs/Installing-sbt-on-Windows.html">Windows</a> <a href="http://www.scala-sbt.org/0.13/docs/Installing-sbt-on-Linux.html">Linux</a> or <a href="http://www.scala-sbt.org/0.13/docs/Installing-sbt-on-Mac.html">Mac</a></p>
-</li>
-<li>
-<p>To get started with a basic scala project, we make a new directory for the project;</p>
+<li>Interactive build tool for scala.</li>
+<li>Very easy to use, documentation wasn't particularly clear I found.</li>
+<li>Install sbt for <a href="http://www.scala-sbt.org/0.13/docs/Installing-sbt-on-Windows.html">Windows</a>, <a href="http://www.scala-sbt.org/0.13/docs/Installing-sbt-on-Linux.html">Linux</a> or <a href="http://www.scala-sbt.org/0.13/docs/Installing-sbt-on-Mac.html">Mac</a>
 </li>
 </ul>
-<pre lang="{bash}"><code>mkdir intro-project &amp;&amp; cd intro-project
+<p>To get started with a basic scala project, we make a new directory for the project;</p>
+<pre lang="{bash}"><code>~$ mkdir intro-project &amp;&amp; cd intro-project
+</code></pre>
+<p>Then, to create a new scala hello-world project, we can run the following command. From my understanding, this pulls a sort of boilerplate project.</p>
+<pre lang="{bash}"><code>~/intro-project$ sbt new scala/hello-world.g8
+</code></pre>
+<p>When prompted, I will use the name 'intro-project'.</p>
+<p>The main scala source file is in src/main/scala/Main.scala, and build.sbt specifies the build properties for the project. This is where we can add packages etc.</p>
+<p>To run this, enter the interactive sbt shell;</p>
+<pre lang="{bash}"><code>~/intro-project$ cd intro-project &amp;&amp; sbt
+sbt:hello-world&gt;
+</code></pre>
+<p>Then, to run the project, just type 'run' and enter;</p>
+<pre lang="{bash}"><code>sbt:hello-world&gt; run
+</code></pre>
+<p>This compiles and runs the project.</p>
+<h3>
+<a id="user-content-practical-project" class="anchor" href="#practical-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Practical Project</h3>
+<p>For this session, I am going to web-scrape the career statistics for the top 50 most successful English batsmen of all time, filter them based on their batting averages, and write them to file.</p>
+<p>We will need to a java package, Jsoup for the webscraping. Something I have found useful at this stage, is that many java packages can be used in scala projects. To add Jsoup to the project, we need to append to the 'libraryDependencies' in build.sbt</p>
+<p>To do this, we add the following lines in our 'build.sbt'</p>
+<pre lang="{scala}"><code>
+libraryDependencies += "org.jsoup" %  "jsoup" % "1.6.1",
+</code></pre>
+<p>To build the project again with these dependencies included, we can just run sbt in the correct directory.</p>
+<p>To use Jsoup in our Main.scala, we have to use the following imports;</p>
+<p>object Main is where the main code for the project gets run, and to include packages we can just use an import statement. Note that including scala.collection.JavaConversions._ is very important, for a while I didn't have this imported, and since it is a java package we are using, this caused errors and it was pretty confusing trying to figure out why.</p>
+<pre lang="{scala}"><code>// src/main/scala/Main.scala
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
+import org.jsoup.select.Elements
+import scala.collection.JavaConversions._
+
+object Main extends App {
+  println("Hello, World")
+}
+</code></pre>
+<p>The basic process for retrieving the data will be as follows;</p>
+<ul>
+<li>Given the url of the relevant data</li>
+<li>Then, make a get request to the url</li>
+<li>Parse the html and retrieve the relevant data</li>
+<li>Create a class bastmenStats class which contains the data relevant to each batsmen.</li>
+<li>Create an array of batsmen stats objects given the scraped data.</li>
+<li>Filter these batsmen based on batting average.</li>
+<li>Write these to file.</li>
+</ul>
+<p>The url for the data is <a href="http://stats.espncricinfo.com/ci/engine/stats/index.html?class=1;team=1;template=results;type=batting">here</a>, and to retrieve this using Jsoup, we can use the following code. Note that in scala, 'val' denotes a an immutable element, and 'var' denotes a mutable element. Both are capable of type inference</p>
+<pre lang="{scala}"><code>val URL="http://stats.espncricinfo.com/ci/engine/stats/index.html?class=1;team=1;template=results;type=batting"
+val document = Jsoup.connect(URL).get()
+</code></pre>
+<p>To get the relevant elements (the table of statistics), we can select all elements with tag 'tr', and of class 'data1'. This will basically give me an array of table row elements from the relevant table. To do this in Jsoup, we can select the relevant elements from the document we 'got';</p>
+<pre lang="{scala}"><code>val row_elements = document.select("tr.data1")
+</code></pre>
+<p>This will give us an array of Jsoup elements, each of which corresponds to a row in the table.</p>
+<p>Then, to extract all the text from the rows, we can 'map' over all elements, and extract the text from the Jsoup element; The map function is one of the most useful functions in scala, and applies a function to each value in an array or list. The following says for each row in rows, apply the function on the right hand side of the equation to it. This will create a new array 'rows', where all the elements in row_elements have had the same function applied to them.</p>
+<pre lang="{scala}"><code>val rows = row_elements.map(
+  row =&gt; row.text()
+)
+</code></pre>
+<p>We are going to get each batsmens name, their highest score, and their batting average. Hence, we want to create a 'Batsmen' class. In scala, we can create a class as follows;</p>
+<pre lang="{scala}"><code>
+class ClassName (param1 : type, param2 : type, // etc.) {
+  var classVariable1 : type = param1;
+  var classVariable2 : type = param2;
+  // etc.
+}
+
+</code></pre>
+<p>Hence to create a Batsmen class with parameters of name runs and average, we can do the following;</p>
+<pre lang="{scala}"><code>
+class Batsmen (name : String, runs : Int, average : Float) {
+  var Name : String = name;
+  var Runs : Int = name;
+  var Average : Float = name;
+}
+
+</code></pre>
+<p>The constructor takes in a name, the highest score, and the average for a batsmen, and assigns these values to Name, Runs, and Average respectively. Note that in scala, when defining variable/ values, we can define them in the following manner if we want to specify the type.</p>
+<pre lang="{scala}"><code>  var x : type = value;
+</code></pre>
+<p>Ideally, from our array of rows, we want to extract an array of batsmen. Hence, if we have a function mapping a string (the row) to a batsman, we can just apply this function to every element in 'rows'.</p>
+<p>To define a function in scala, we use the following syntax.</p>
+<pre lang="{scala}"><code>def function_name ( parameters ) : return_type {
+  body
+}
+</code></pre>
+<p>Our function needs to take a string, for the row, and return a batsmen.</p>
+<p>We can get the batsman's name, by splitting the string on " ", and taking the first two values. The number of runs, is the 6th value in the split string, and the average is the 8th value in the split string.</p>
+<p>Hence, our function will be as follows;</p>
+<pre lang="{scala}"><code>def getBatsmen (row_text : String) : Batsmen = {
+  val splitted_string = row_text.split(" ")
+  val name = splitted_string.slice(1, 2).mkString(" ")
+  val runs = splitted_string(6).toInt
+  val average = splitted_string(8).toFloat
+  val batsmen = new Batsmen(name, runs, average)
+  return batsmen
+}
+</code></pre>
+<p>Note that list.slice(0, 2) is the same as list[1:2], and .mkString(" ") is the same as ' '.join() in python, or paste0 in R.</p>
+<p>So, to get an array of Batsmen, we can apply this function (using map) over the array of rows.</p>
+<pre lang="{scala}"><code>val allBatsmen = rows.map(
+  row =&gt; getBatsmen(row)
+)
+</code></pre>
+<p>We can then use the 'filter' function to filter all the batsmen who have a batting average greater than 40. We can then zip this with index, to get the ranking of each batsmen by runs, who have an average over 40.</p>
+<p>The filter function takes an array, and returns all those which result in a true value to the expression which is passed.</p>
+<p>``{scala}
+val batsmenOverForty = allBatsmen.filter(
+batsmen =&gt; batsmen.Average &gt; 40
+).zipWithIndex</p>
+<pre><code>
+To print out the players, with their rank, name, number of runs, and batting average, we can hence map a 'println' method over the array of zipped values. Since we have zipped the values, we are mapping over an array of tuples. In scala, tuples are indexed 1,...,n. Which I do not like. In this case, when we map over all elements;
+
+```{scala}
+
+el._1 = Batsmen Object
+el._2 = Rank
+
+</code></pre>
+<p>To write this to file, we must import java.io._</p>
+<pre lang="{scala}"><code>import java.io._
+</code></pre>
+<p>Then we can define a print writer, which we will use to write the data to file;</p>
+<pre lang="{scala}"><code>
+val writer = new PrintWriter(new File("batsmen.txt"))
+
+</code></pre>
+<p>Then, we can map over the batsmenOverForty array, and write a line, describing the name, the number of runs, the average, and the rank.</p>
+<pre lang="{scala}"><code>
+batsmenOverForty.map(
+  batsman =&gt; writer.write(
+   batsman._1.Name.concat(", Runs: ").concat(
+      batsman._1.Runs.toString
+    ).concat(", Average: ").concat(
+      batsman._1.Average.toString
+    ).concat(", Rank: ").concat(
+      (batsman._2+1).toString
+    ).concat("\n")
+  )
+)
+
+</code></pre>
+<p>Note that in scala;</p>
+<pre lang="{scala}"><code>"a".concat(" b") = "a b"
+</code></pre>
+<p>After we have done this, we have to close the file;</p>
+<pre lang="{scala}"><code>
+writer.close()
+
+</code></pre>
+<p>The entire script to scrape this data, to write this to a text file is as follows;</p>
+<pre lang="{scala}"><code>
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import org.jsoup.nodes.Element
+import org.jsoup.select.Elements
+import scala.collection.JavaConversions._
+import java.io._
+
+class Batsmen (name : String, runs : Int, average : Float) {
+  var Name : String = name;
+  var Runs : Int = runs;
+  var Average : Float = average;
+}
+
+object Main extends App {
+  val URL = "http://stats.espncricinfo.com/ci/engine/stats/index.html?class=1;team=1;template=results;type=batting"
+
+  val document = Jsoup.connect(URL).get()
+
+  val row_elements = document.select("tr.data1")
+
+  val rows = row_elements.map(
+    row =&gt; row.text
+  )
+
+  def getBatsmen (row_text : String) : Batsmen = {
+    val splitted_string = row_text.split(" ")
+    val name = splitted_string.slice(0, 2).mkString(" ")
+    val runs = splitted_string(6).toInt
+    val average = splitted_string(8).toFloat
+    val batsmen = new Batsmen(name, runs, average)
+    return batsmen
+  }
+
+  val allBatsmen = rows.map(
+    row =&gt; getBatsmen(row)
+  )
+
+  val batsmenOverForty = allBatsmen.filter(
+    batsmen =&gt; batsmen.Average &gt; 40
+  ).zipWithIndex
+
+  val writer = new PrintWriter(new File("batsmen.txt"))
+
+  batsmenOverForty.map(
+    batsman =&gt; writer.write(
+     batsman._1.Name.concat(", Runs: ").concat(
+        batsman._1.Runs.toString
+      ).concat(", Average: ").concat(
+        batsman._1.Average.toString
+      ).concat(", Rank: ").concat(
+        (batsman._2+1).toString
+      ).concat("\n")
+    )
+  )
+
+  writer.close()
+
+}
+
 </code></pre>
 
               </article>

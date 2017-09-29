@@ -29,7 +29,7 @@ To get started with a basic scala project, we make a new directory for the proje
 ~$ mkdir intro-project && cd intro-project
 ```
 
-Then, to create a new scala hello-world project, we can run the following;
+Then, to create a new scala hello-world project, we can run the following command. From my understanding, this pulls a sort of boilerplate project.
 
 ```{bash}
 ~/intro-project$ sbt new scala/hello-world.g8
@@ -53,22 +53,21 @@ This compiles and runs the project.
 
 ### Practical Project
 
-For this session, I am going to web-scrape the career statistics for the top 50 most successful English batsmen of all time.
+For this session, I am going to web-scrape the career statistics for the top 50 most successful English batsmen of all time, filter them based on their batting averages, and write them to file.
 
-We will need to use a few packages; Gson for the json conversion, and Jsoup for the webscraping. Something I have found useful at this stage, is that many java packages can be used in scala projects. To add Gson and Jsoup to the project, we need to append to the 'libraryDependencies' in build.sbt
+We will need to a java package, Jsoup for the webscraping. Something I have found useful at this stage, is that many java packages can be used in scala projects. To add Jsoup to the project, we need to append to the 'libraryDependencies' in build.sbt
 
 To do this, we add the following lines in our 'build.sbt'
 
 ```{scala}
 
 libraryDependencies += "org.jsoup" %  "jsoup" % "1.6.1",
-libraryDependencies += "com.google.code.gson" % "gson" % "1.7.1"
 ```
 To build the project again with these dependencies included, we can just run sbt in the correct directory.
 
 To use Jsoup in our Main.scala, we have to use the following imports;
 
-object Main is where the main code for the project gets run, and to include packages we can just use an import statement
+object Main is where the main code for the project gets run, and to include packages we can just use an import statement. Note that including scala.collection.JavaConversions._ is very important, for a while I didn't have this imported, and since it is a java package we are using, this caused errors and it was pretty confusing trying to figure out why.
 
 ```{scala}
 // src/main/scala/Main.scala
@@ -89,19 +88,18 @@ The basic process for retrieving the data will be as follows;
 * Then, make a get request to the url
 * Parse the html and retrieve the relevant data
 * Create a class bastmenStats class which contains the data relevant to each batsmen.
-* Create an array of bastment stats objects given the scraped data.
+* Create an array of batsmen stats objects given the scraped data.
+* Filter these batsmen based on batting average.
 * Write these to file.
 
-The url for the data is [here](http://stats.espncricinfo.com/ci/engine/stats/index.html?class=1;team=1;template=results;type=batting), and to retrieve this using Jsoup, we can use the following code;
+The url for the data is [here](http://stats.espncricinfo.com/ci/engine/stats/index.html?class=1;team=1;template=results;type=batting), and to retrieve this using Jsoup, we can use the following code. Note that in scala, 'val' denotes a an immutable element, and 'var' denotes a mutable element. Both are capable of type inference
 
 ```{scala}
 val URL="http://stats.espncricinfo.com/ci/engine/stats/index.html?class=1;team=1;template=results;type=batting"
 val document = Jsoup.connect(URL).get()
 ```
 
-Note that in scala, 'val' denotes a an immutable element, and 'var' denotes a mutable element.
-
-To get the relevant elements (the table of statistics), we can select all elements with tag 'tr', and of class 'data1'. To do this in Jsoup, we can select the relevant elements from the document we 'got';
+To get the relevant elements (the table of statistics), we can select all elements with tag 'tr', and of class 'data1'. This will basically give me an array of table row elements from the relevant table. To do this in Jsoup, we can select the relevant elements from the document we 'got';
 
 ```{scala}
 val row_elements = document.select("tr.data1")
@@ -121,6 +119,18 @@ We are going to get each batsmens name, their highest score, and their batting a
 
 ```{scala}
 
+class ClassName (param1 : type, param2 : type, // etc.) {
+  var classVariable1 : type = param1;
+  var classVariable2 : type = param2;
+  // etc.
+}
+
+```
+
+Hence to create a Batsmen class with parameters of name runs and average, we can do the following;
+
+```{scala}
+
 class Batsmen (name : String, runs : Int, average : Float) {
   var Name : String = name;
   var Runs : Int = name;
@@ -129,7 +139,7 @@ class Batsmen (name : String, runs : Int, average : Float) {
 
 ```
 
-The constructor takes in a name, the highest score, and the average for a batsmen, and assigns these values to Name, Runs, and Average respectively. Note that in scala, when defining variables, we define them as;
+The constructor takes in a name, the highest score, and the average for a batsmen, and assigns these values to Name, Runs, and Average respectively. Note that in scala, when defining variable/ values, we can define them in the following manner if we want to specify the type.
 
 ```{scala}
   var x : type = value;
@@ -162,17 +172,27 @@ def getBatsmen (row_text : String) : Batsmen = {
 }
 ```
 
-Note that list.slice(1,2) is the same as list[1:2], and .mkString(" ") is the same as ' '.join() in python, or paste0 in R.
+Note that list.slice(0, 2) is the same as list[1:2], and .mkString(" ") is the same as ' '.join() in python, or paste0 in R.
 
-So, to get an array of Batsmen, we can apply this function (using map) over the array of rows. We can also zip this output array with it's index, to give a rank for each player.
+So, to get an array of Batsmen, we can apply this function (using map) over the array of rows.
 
 ```{scala}
 val allBatsmen = rows.map(
   row => getBatsmen(row)
+)
+```
+
+We can then use the 'filter' function to filter all the batsmen who have a batting average greater than 40. We can then zip this with index, to get the ranking of each batsmen by runs, who have an average over 40.
+
+The filter function takes an array, and returns all those which result in a true value to the expression which is passed.
+
+``{scala}
+val batsmenOverForty = allBatsmen.filter(
+  batsmen => batsmen.Average > 40
 ).zipWithIndex
 ```
 
-To print out all the players, with their rank, name, number of runs, and batting average, we can hence map a 'println' method over the array of zipped values. Since we have zipped the values, we are mapping over an array of tuples. In scala, tuples are indexed 1,...,n. Which I do not like. In this case, when we map over all elements;
+To print out the players, with their rank, name, number of runs, and batting average, we can hence map a 'println' method over the array of zipped values. Since we have zipped the values, we are mapping over an array of tuples. In scala, tuples are indexed 1,...,n. Which I do not like. In this case, when we map over all elements;
 
 ```{scala}
 
@@ -181,19 +201,33 @@ el._2 = Rank
 
 ```
 
-Hence, to println for each batsmen, displaying their relevant data, we can do the following;
+To write this to file, we must import java.io._
+
+```{scala}
+import java.io._
+```
+
+Then we can define a print writer, which we will use to write the data to file;
 
 ```{scala}
 
-allBatsmen.map(
-  batsman => println(
+val writer = new PrintWriter(new File("batsmen.txt"))
+
+```
+
+Then, we can map over the batsmenOverForty array, and write a line, describing the name, the number of runs, the average, and the rank.
+
+```{scala}
+
+batsmenOverForty.map(
+  batsman => writer.write(
    batsman._1.Name.concat(", Runs: ").concat(
       batsman._1.Runs.toString
     ).concat(", Average: ").concat(
       batsman._1.Average.toString
     ).concat(", Rank: ").concat(
       (batsman._2+1).toString
-    )
+    ).concat("\n")
   )
 )
 
@@ -205,16 +239,24 @@ Note that in scala;
 "a".concat(" b") = "a b"
 ```
 
-The entire script to scrape this data, and print it to terminal is as follows;
+After we have done this, we have to close the file;
 
 ```{scala}
-// src/main/scala/Main.scala
+
+writer.close()
+
+```
+
+The entire script to scrape this data, to write this to a text file is as follows;
+
+```{scala}
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import scala.collection.JavaConversions._
+import java.io._
 
 class Batsmen (name : String, runs : Int, average : Float) {
   var Name : String = name;
@@ -223,38 +265,49 @@ class Batsmen (name : String, runs : Int, average : Float) {
 }
 
 object Main extends App {
-   val URL = "http://stats.espncricinfo.com/ci/engine/stats/index.html?class=1;team=1;template=results;type=batting"
-   val document = Jsoup.connect(URL).get()
+  val URL = "http://stats.espncricinfo.com/ci/engine/stats/index.html?class=1;team=1;template=results;type=batting"
 
-   val row_elements = document.select("tr.data1")
-   val rows = row_elements.map(
-     row => row.text()
-   )
+  val document = Jsoup.connect(URL).get()
 
-   def getBatsmen (row_text : String) : Batsmen = {
-     val splitted_string = row_text.split(" ")
-     val name = splitted_string.slice(0, 2).mkString(" ")
-     val runs = splitted_string(6).toInt
-     val average = splitted_string(8).toFloat
-     val batsmen = new Batsmen(name, runs, average)
-     return batsmen
-   }
+  val row_elements = document.select("tr.data1")
 
-   val allBatsmen = rows.map(
-     row => getBatsmen(row)
-   ).zipWithIndex
+  val rows = row_elements.map(
+    row => row.text
+  )
 
-   allBatsmen.map(
-     batsman => println(
-      batsman._1.Name.concat(", Runs: ").concat(
-         batsman._1.Runs.toString
-       ).concat(", Average: ").concat(
-         batsman._1.Average.toString
-       ).concat(", Rank: ").concat(
-         (batsman._2+1).toString
-       )
-     )
-   )
+  def getBatsmen (row_text : String) : Batsmen = {
+    val splitted_string = row_text.split(" ")
+    val name = splitted_string.slice(0, 2).mkString(" ")
+    val runs = splitted_string(6).toInt
+    val average = splitted_string(8).toFloat
+    val batsmen = new Batsmen(name, runs, average)
+    return batsmen
+  }
+
+  val allBatsmen = rows.map(
+    row => getBatsmen(row)
+  )
+
+  val batsmenOverForty = allBatsmen.filter(
+    batsmen => batsmen.Average > 40
+  ).zipWithIndex
+
+  val writer = new PrintWriter(new File("batsmen.txt"))
+
+  batsmenOverForty.map(
+    batsman => writer.write(
+     batsman._1.Name.concat(", Runs: ").concat(
+        batsman._1.Runs.toString
+      ).concat(", Average: ").concat(
+        batsman._1.Average.toString
+      ).concat(", Rank: ").concat(
+        (batsman._2+1).toString
+      ).concat("\n")
+    )
+  )
+
+  writer.close()
+
 }
 
 ```
