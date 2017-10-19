@@ -45,7 +45,7 @@ object Main extends App {
     batsman => writer.write(
      batsman._1.Name.concat(", Runs: ").concat(
         batsman._1.Runs.toString
-      ).concat(", Average: ").concat(
+      ).concat(", ").concat(
         batsman._1.Average.toString
       ).concat(", Rank: ").concat(
         (batsman._2+1).toString
