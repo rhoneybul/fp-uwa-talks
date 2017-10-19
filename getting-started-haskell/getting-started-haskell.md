@@ -243,4 +243,11 @@ if length results == 0
 
 And that's done!!
 
-The whole code can be found here ;
+The whole code can be found [here](https://github.com/rhoneybul/fp-uwa-talks/tree/master/getting-started-haskell) ;
+
+Note to compile and run this using ghc, we can run the following;
+
+```{bash}
+$ ghc -o run main.hs
+$ ./run
+```
