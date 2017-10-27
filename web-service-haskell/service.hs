@@ -53,6 +53,10 @@ routes = do
     get "/" index 
     get "/search/:sstring" findByName
     get "/batsman/:id" findById
+    get "/all/" returnAllBatsmen
+    
+returnAllBatsmen :: ActionM ()
+returnAllBatsmen = json (allBatsmen)
 
 findByName :: ActionM ()
 findByName = do
