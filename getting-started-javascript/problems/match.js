@@ -1,6 +1,6 @@
 /*
   Run this file with the command:
-    "npx babel-node problems/filter_where.js"
+    "npx babel-node problems/match.js"
 
   Use < array.prototype.filter > to write a function 
   that takes a list of objects and finds all objects

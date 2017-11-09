@@ -1,6 +1,6 @@
 /*
   Run this file with the command:
-    "npx babel-node solutions/filter_where.js"
+    "npx babel-node solutions/match.js"
 
   Use < array.prototype.filter > to write a function 
   that takes a list of objects and finds all objects
@@ -29,13 +29,13 @@ let result;
 
 // ES6+ Style
 
-const filterWhere = (array, searchItem) => {
+const match = (array, searchItem) => {
   const key = Object.keys(searchItem)[0];
   const value = searchItem[key];
   return array.filter(({ [key]: foo }) => foo === value);
 };
 
-result = filterWhere(ladders, { height: 25 });
+result = match(ladders, { height: 25 });
 console.log("ES6+ Style:", result);
 
 // with Currying
@@ -51,7 +51,7 @@ console.log("Curried (2 Steps):", result);
 
 // ES5 Style
 
-function filterWhere_old(array, searchItem) {
+function match_old(array, searchItem) {
   var key = Object.keys(searchItem)[0];
   var value = searchItem[key];
   return array.filter(function(element) {
@@ -59,5 +59,5 @@ function filterWhere_old(array, searchItem) {
   });
 }
 
-result = filterWhere_old(ladders, { height: 25 });
+result = match_old(ladders, { height: 25 });
 console.log("ES5 Style:", result);
