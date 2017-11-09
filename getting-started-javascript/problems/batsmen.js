@@ -1,6 +1,6 @@
 /*
   Run this file with the command:
-    "npx babel-node solutions/batsmen.js"
+    "npx babel-node problems/batsmen.js"
 
   Read in batsmen from a comma separated file and
   convert them into a list of objects with 
@@ -24,16 +24,8 @@ const output = fs
   .readFileSync("assets/batsmen-data.txt", "utf8")
   .trim() // trims whitespace
   .split("\n") // splits file into lines
-  .map(
-    line =>
-      line
-        .split(",") // splits line into fields
-        .map(val => val.trim()) // trims whitespace
-        .map(val => parseInt(val) || val) // coerces to int
-  )
-  .map(([name, ...rest]) => [...name.split(" "), ...rest]) // splits name
-  .map(([inits, surname, tot, avg]) => ({ inits, surname, tot, avg })) // converts to object
-  .sort((a, b) => b.tot - a.tot) //sort descending by runs
-  .filter(({ surname }) => surname.startsWith("C")); // batter starts with M
+  .map(text => text); //chain your methods here like so
+
+// your time to shine.
 
 console.log(output);

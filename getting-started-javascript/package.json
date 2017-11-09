@@ -1,5 +1,5 @@
 {
-  "name": "fx_javascript",
+  "name": "getting_started_javascript",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -14,9 +14,6 @@
   "author": "",
   "license": "ISC",
   "babel": {
-    "presets": [
-      "env",
-      "stage-2"
-    ]
+    "presets": ["env", "stage-2"]
   }
 }
